@@ -1,0 +1,78 @@
+@import url("https://fonts.googleapis.com/css?family=Acme");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Tahoma, Geneva, sans-serif;
+  background: #1a1a1d;
+}
+
+.content {
+  width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+header {
+  background: #950740;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  position: sticky;
+}
+
+nav {
+  background: #4e4e50;
+  color: white;
+}
+
+.recipeDisplay {
+  background-color: #6f2232;
+  color:white;
+  font-size: clamp(16px, 2vw, 25px);
+}
+
+.summaryInfo {
+  display: flex;
+  flex-direction: row;
+  height: 30%;
+  flex-wrap: wrap;
+}
+
+.summaryInfo> p{
+    flex-grow: 3;
+}
+
+.summaryInfo > img {
+  max-width: 50%;
+  max-height: 100%;
+  flex-grow: 1;
+}
+
+.ingredientDisplay {
+  background: #C3073F;
+}
+
+.ingredientDisplay > ul{
+    display: none;
+}
+
+.instructionDisplay {
+  background: #C3073F;
+}
+
+.instructionDisplay > ol{
+    display: none;
+}
+
+.inputForm {
+  background:#950740;
+  display: none;
+  color: white;
+}
+
+.inputForm > fieldset {
+  background-color: #6f2232;
+}
