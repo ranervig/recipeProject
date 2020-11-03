@@ -19,8 +19,10 @@ const upload = multer({ storage: storage});
 const database = new Datastore('database.db');
 database.loadDatabase();
 
-app.listen(3000,()=> {
-    console.log('listening at 3000');
+const port = process.env.PORT || 3000;
+
+app.listen(port,()=> {
+    console.log(`Starting server at ${port}`);
 });
 
 const dir = path.join(__dirname, 'public');
