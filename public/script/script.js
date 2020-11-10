@@ -1,9 +1,10 @@
 let recipes = [];
 
+let modifier = 1;
+
 async function getData() {
   const response = await fetch("/api");
   recipes = await response.json();
-  console.log(recipes);
   updateSelect();
 }
 
@@ -37,7 +38,7 @@ function displayInfo(recipe) {
   let addedDate = new Date(recipe.timestamp);
 
   div.insertAdjacentHTML("beforeend",
-  ` <p>Serves: ${recipe.servings}<br>
+  ` <p>Serves: ${recipe.servings * modifier}</span><br>
     Prep: ${recipe.prep} ${recipe.prephm}<br>
     Cook: ${recipe.cook} ${recipe.cookhm}<br>
     Added On: ${addedDate.toLocaleDateString()}</p>
@@ -46,13 +47,16 @@ function displayInfo(recipe) {
   return div;
 }
 
-function displayIngredients(ingredients) {
+function displayIngredients(ingredients, display) {
   let div = document.createElement("div");
   div.className = "ingredientDisplay";
-  
+
   let h3 = document.createElement("h3");
   h3.textContent = "Ingredients";
   div.append(h3);
+
+  let list = document.createElement("ul");
+  list.id = "ingredientList";
 
   let button = document.createElement('button');
   button.innerText = "Show";
@@ -67,18 +71,24 @@ function displayIngredients(ingredients) {
   });
   div.appendChild(button);
 
-  let list = document.createElement("ul");
+
   ingredients.forEach((ing) =>{ 
     let li = document.createElement("li");
-    li.innerHTML = `${ing.amount} ${ing.unit} ${ing.ingredient}`;
+    let amount = ing.amount * modifier;
+    let unit = ing.unit;
+    //add plural s to end of unit if more than 1 unit is called for
+    if(amount > 1 && unit.charAt(unit.length-1) !== 's'){
+      unit += "s";
+    }
+    li.innerHTML = `${ing.amount * modifier} ${unit} ${ing.ingredient}`;
     list.appendChild(li);
   });
-  list.style.display = "none";
+  list.style.display = display;
   div.append(list);
   return div;
 }
 
-function displayInstructions(instructions) {
+function displayInstructions(instructions, display) {
   let div = document.createElement("div");
   div.className = "instructionDisplay";
 
@@ -86,6 +96,9 @@ function displayInstructions(instructions) {
   h3.textContent = "Instructions";
   div.append(h3);
 
+  let list = document.createElement("ol");
+  list.id = "instructionList";
+
   let button = document.createElement('button');
   button.innerText = "Show";
   button.addEventListener("click", e => {
@@ -99,34 +112,36 @@ function displayInstructions(instructions) {
   });
   div.appendChild(button);
 
-  let list = document.createElement("ol");
   instructions.forEach((inst) => {
     let li = document.createElement("li");
     li.textContent = inst;
     list.appendChild(li);
   });
-  list.style.display = "none";
+  list.style.display = display;
   div.append(list);
   return div;
 }
 
-function displayRecipe(index) {
+function displayRecipe(index, ingDisplay, instDisplay) {
   let recipeObj = recipes[index];
   displayArea = document.querySelector(".recipeDisplay");
+  //clear displayArea
   displayArea.innerHTML = "";
+
   let h2 = document.createElement("H2");
   h2.textContent = recipeObj.recipe;
   displayArea.append(h2);
+
   displayArea.append(displayInfo(recipeObj));
-  displayArea.append(displayIngredients(recipeObj.ingredients));
-  displayArea.append(displayInstructions(recipeObj.instructions));
+  displayArea.append(displayIngredients(recipeObj.ingredients, ingDisplay));
+  displayArea.append(displayInstructions(recipeObj.instructions, instDisplay));
 }
 
 function addIngredient(){
   let p = document.createElement('p');
   p.innerHTML = 
   `
-  <label>Amount: <input type="text" name="ingredients" /></label>
+  <label>Amount: <input type="number" name="ingredients" step=".1" min=".1"/></label>
   <label>Unit: <input list="measurementUS" name="ingredients" /></label>
   <label>Ingredient: <input type="text" name="ingredients" /></label>
   `
@@ -139,6 +154,7 @@ function addInstruction(){
   document.querySelector(".instructions > ol").appendChild(li);
 }
 
+//temporarily loads image to disply a preview of selected file
 function previewImage(event){
   let reader = new FileReader();
   reader.onload = () => {
@@ -149,11 +165,12 @@ function previewImage(event){
 }
 
 function changeServings(serving){
-  
-}
-
-function formatServings(quantity, modifier){
-  
+  modifier = serving;
+  displayRecipe(
+    document.querySelector("#recipeSelect").selectedIndex,
+    document.querySelector("#ingredientList").style.display,
+    document.querySelector("#instructionList").style.display
+  );
 }
 
 window.addEventListener("load", async () => {
@@ -163,19 +180,20 @@ window.addEventListener("load", async () => {
   if(select.length == 0){
     select.style.display = 'none';
   }
-  select.addEventListener("change", (e) => {
-    displayRecipe(select.selectedIndex);
-  });
-  
-
   let form = document.querySelector(".inputForm");
   form.style.display = "none";
   if(recipes.length == 0){
-    console.log("No Recipes");
+    alert("No Recipes Found");
     form.style.display = "block";
-    }else{
-      displayRecipe(0);
-    }
+  }else{
+      displayRecipe(0, "none", "none");
+  }
+  select.addEventListener("change", (e) => {
+    displayRecipe(select.selectedIndex,
+      document.querySelector("#ingredientList").style.display,
+      document.querySelector("#instructionList").style.display
+      );
+  });
 
   document.querySelector("#newRecipe").addEventListener("click", e => {
     if( form.style.display != 'none'){
@@ -185,10 +203,12 @@ window.addEventListener("load", async () => {
     }
   });
 
-  let servingSize = document.querySelector("[name=servingSelect]");
-  servingSize.addEventListener("change", () => {
-    changeServings(servingSize.value);
-  });
+  let servingSize = document.querySelectorAll("[name=servingSelect]");
+  servingSize.forEach(radio =>{
+    radio.addEventListener("click", () => {
+    changeServings(radio.value);
+    }
+  )});
 
   document.querySelector("[name= 'photo']").addEventListener("change", event =>{
     previewImage(event);
@@ -199,7 +219,6 @@ window.addEventListener("load", async () => {
   document.querySelector('#addInstruction').addEventListener("click", addInstruction);
 
   form.addEventListener("submit", async (e) => {
-    console.log("button pressed");
     e.preventDefault();
     e.stopPropagation();
 
@@ -210,7 +229,6 @@ window.addEventListener("load", async () => {
       console.log(error);
     });
     let result = await response.json();
-    console.log(result.recipe + " at " + result.timestamp);
     await getData();
   });
 });

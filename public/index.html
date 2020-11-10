@@ -28,16 +28,16 @@
         <br />
         <fieldset class="info">
           <legend>Basic Information</legend>
-          <p><label>Servings: <input type="text" name="servings" /></label></p>
+          <p><label>Servings: <input type="number" name="servings" min="1"/></label></p>
           <p><label>
-            Prep time: <input type="number" step=".1" name="prep" />
+            Prep time: <input type="number" step=".1" name="prep" min="0" />
             <select name="prephm">
               <option value="minutes">min</option>
               <option value="hours">hr</option>
             </select>
           </label></p>
           <p><label>
-            Cook time: <input type="number" step=".1" name="cook" />
+            Cook time: <input type="number" step=".1" name="cook" min="0"/>
             <select name="cookhm">
               <option value="minutes">min</option>
               <option value="hours">hr</option>
@@ -48,8 +48,8 @@
           <legend>Ingredients</legend>
           <button type="button" id="addIngredient">Add Ingredient</button>
           <p>
-            <label>Amount: <input type="text" name="ingredients" /></label>
-            <label>Unit: <input list="measurementUS" name="ingredients" /></label>
+            <label>Amount: <input type="number" step=".1" name="ingredients" min=".1" required/></label>
+            <label>Unit: <input list="measurementUS" name="ingredients" required/></label>
             <datalist id="measurementUS">
               <option>tsp</option>
               <option>tbsp</option>
@@ -60,7 +60,7 @@
               <option>can</option>
               <option>container</option>
             </datalist>
-            <label>Ingredient: <input type="text" name="ingredients" /></label> 
+            <label>Ingredient: <input type="text" name="ingredients" required/></label> 
           </p>
         </fieldset>
         <br />
@@ -68,7 +68,7 @@
           <legend>Instructions</legend>
           <button type="button" id="addInstruction">Add Instruction</button>
           <ol>
-            <li><input type="text" name="instructions" /></li>
+            <li><input type="text" name="instructions" required/></li>
           </ol>
         </fieldset>
         <p>
