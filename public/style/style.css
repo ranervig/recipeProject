@@ -76,3 +76,7 @@ nav {
 .inputForm > fieldset {
   background-color: #6f2232;
 }
+
+#imagePreview {
+  max-width: 250px;
+}

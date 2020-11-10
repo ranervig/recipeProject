@@ -29,7 +29,7 @@ const dir = path.join(__dirname, 'public');
 
 app.use(express.static(dir));
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '1mb', extended: true }));
 
 //pull all recipies
 app.get('/api',(request,response) => {
@@ -47,6 +47,7 @@ app.get('/api',(request,response) => {
 
 //serve images
 app.get('/uploads/images/*', (request,response) => {
+    console.log("I got an Image request!");
     response.sendFile(path.join(__dirname, request.url));
 })
 
@@ -55,6 +56,21 @@ app.post('/api', upload.single('photo'), (request, response) =>{
     console.log("I got a POST request!");
     const data = request.body;
     console.log(data);
+    let tempIng = data.ingredients.slice();
+    let newIng = [];
+    while(tempIng.length !=0){
+        newIng.push({
+            amount: tempIng.shift(),
+            unit: tempIng.shift(),
+            ingredient: tempIng.shift()
+        });
+    }
+    //convert single instruction into array
+    if(typeof data.instructions === "string"){
+        data.instructions = [data.instructions];
+    }
+    console.log(newIng);
+    data.ingredients = newIng;
     const timestamp = Date.now();
     data.timestamp = timestamp;
     if(request.file){
@@ -65,6 +81,13 @@ app.post('/api', upload.single('photo'), (request, response) =>{
         data.path = "";
     }
     console.log(data);
-    database.insert(data);
-    response.json(data);
+    database.insert(data, function (err, newData){
+        if(err == null){
+            console.log(newData);
+            response.json(newData);
+        }else{
+            response.end();
+        }
+    });
+    
 });
